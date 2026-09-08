@@ -58,6 +58,10 @@ html { scroll-behavior: smooth; }
   * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
+html {
+     overflow-x: hidden;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -68,8 +72,8 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 800; letter-spacing: -0.02em; margin: 0; color: var(--navy); }
-p { margin: 0; }
+h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 800; letter-spacing: -0.02em; margin: 0; color: var(--navy); overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
+p { margin: 0; overflow-wrap: break-word; }
 a { color: var(--orange-text); text-decoration: none; }
 img { display: block; max-width: 100%; }
 button { font-family: inherit; }
@@ -623,20 +627,6 @@ footer { background: var(--navy); color: var(--on-navy-muted); padding: 64px 0 3
 .report-cta-box h3 { color: #fff; font-size: 19px; }
 .report-cta-box p { color: var(--on-navy-muted); font-size: 14px; line-height: 1.6; margin-top: 8px; }
 .report-cta-box .btn { margin-top: 20px; }
-.report-email-box {
-  max-width: 560px; margin: 20px auto 0; background: var(--beige-surface);
-  border: 1px solid var(--beige-border); border-radius: var(--radius-lg); padding: 32px; text-align: center;
-}
-.report-email-box h3 { color: var(--navy); font-size: 17px; }
-.report-email-box p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-top: 8px; }
-.report-email-form { display: flex; gap: 10px; margin-top: 18px; }
-.report-email-form input {
-  flex: 1; padding: 13px 16px; border: 1px solid var(--border); border-radius: var(--radius-pill);
-  font-size: 15px; font-family: inherit; color: var(--text); background: #fff;
-}
-.report-email-form input:focus { outline: 2px solid var(--orange); outline-offset: 1px; }
-.report-email-form .btn { flex: none; }
-@media (max-width: 560px) { .report-email-form { flex-direction: column; } }
 @media (max-width: 860px) { .report-grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* ── Blog ─────────────────────────────────────────────────────────────── */

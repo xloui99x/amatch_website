@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en-CH">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Job Ad Check · A Match</title>
+<meta name="description" content="Upload your job ad and get a free, honest assessment of why it might not be bringing in qualified applications.">
+<meta name="theme-color" content="#1B3557">
+<link rel="canonical" href="https://amatch.ch/en/job-ad-check.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 754 616'%3E%3Cpath d='M0,616 L311,0 L376,129 L154,569 Q130,616 78,616 Z' fill='%231B3557'/%3E%3Cpath d='M311,0 L400,0 Q443,0 465,44 L754,616 L674,616 Q622,616 598,569 Z' fill='%23E8622C'/%3E%3Ccircle cx='377' cy='419' r='64' fill='%231B3557'/%3E%3Cpath d='M263,616 L263,585 A80,80 0 0 1 343,505 L411,505 A80,80 0 0 1 491,585 L491,616 Z' fill='%231B3557'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="container">
+    <a href="mailto:contact@amatch.ch" class="icon-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>contact@amatch.ch</a>
+    <a href="tel:+41796402791" class="icon-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.5.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.2.2 2.4.57 3.5a1 1 0 0 1-.25 1z"/></svg>+41 79 640 27 91</a>
+  </div>
+</div>
+
+<header class="site-header">
+  <nav class="nav container">
+    <a href="index.html" class="brand" aria-label="A Match · Home">
+      <svg viewBox="0 0 754 616" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M0,616 L311,0 L376,129 L154,569 Q130,616 78,616 Z" fill="#1B3557"/>
+        <path d="M311,0 L400,0 Q443,0 465,44 L754,616 L674,616 Q622,616 598,569 Z" fill="#E8622C"/>
+        <circle cx="377" cy="419" r="64" fill="#1B3557"/>
+        <path d="M263,616 L263,585 A80,80 0 0 1 343,505 L411,505 A80,80 0 0 1 491,585 L491,616 Z" fill="#1B3557"/>
+      </svg>
+      <span class="brand-word"><span>A</span>&nbsp;Match</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#services">Services</a>
+      <a href="about.html">About</a>
+      <a href="references.html">References</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="book-a-call.html" class="btn btn-primary btn-sm"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Free initial consultation<span class="btn-arrow">&nbsp;→</span></a>
+    <div class="lang-switch" aria-label="Sprache wählen">
+        <a href="../">DE</a>
+        <span class="sep">·</span>
+        <a href="../fr/">FR</a>
+        <span class="sep">·</span>
+        <span aria-current="true">EN</span>
+      </div>
+      </div>
+    <button type="button" class="nav-toggle" aria-label="Menü öffnen" aria-expanded="false">
+      <span></span>
+    </button>
+  </nav>
+</header>
+<main>
+  <div class="container contact-hero" style="text-align:center;">
+    <span class="kicker">Free & no obligation</span>
+    <h1>Is your <span class="hl">job ad</span> actually working?</h1>
+    <p style="margin-left:auto;margin-right:auto;">Upload your current job ad and find out why it might not be bringing in qualified applications.</p>
+  </div>
+
+  <div class="container" style="margin-top:40px;">
+    <form class="check-form js-website-check-form">
+      <div class="check-field">
+        <label for="check-url">Link to your job ad</label>
+        <input type="text" id="check-url" name="url" required placeholder="www.your-company.ch/job-ad">
+      </div>
+      <button type="submit" class="btn btn-primary">Analyze job ad</button>
+      <p class="check-submit-note">The analysis runs right here on the page, no sign-up needed.</p>
+    </form>
+  </div>
+
+  <div id="checkResults" hidden></div>
+
+  <section class="section-tight">
+    <div class="container">
+      <div class="section-head reveal" style="text-align:center;margin-left:auto;margin-right:auto;">
+        <span class="kicker">The check</span>
+        <h2>What we check</h2>
+      </div>
+      <div class="check-grid">
+        <div class="check-card reveal">
+          <span class="badge badge-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
+          <h3>Role description</h3>
+          <p>Is it clear what the role involves and who you're looking for?</p>
+        </div>
+        <div class="check-card reveal">
+          <span class="badge badge-navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 7.5 16 16.5"/></svg></span>
+          <h3>Application process</h3>
+          <p>How many hurdles sit between interest and an actual application?</p>
+        </div>
+        <div class="check-card reveal">
+          <span class="badge badge-steel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m12 3 2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6-4.6-4.1 6.1-.6z"/></svg></span>
+          <h3>Employer benefits</h3>
+          <p>Does it show what makes your business attractive to skilled workers?</p>
+        </div>
+        <div class="check-card reveal">
+          <span class="badge badge-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10v4a1 1 0 0 0 1 1h2l4 4V5L6 9H4a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8M18 5a8 8 0 0 1 0 14"/></svg></span>
+          <h3>Reach</h3>
+          <p>Does the ad reach skilled workers who aren't actively searching?</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container" style="max-width:720px;text-align:center;">
+      <h2>How it works</h2>
+      <p style="color:var(--text-muted);font-size:16px;line-height:1.6;margin-top:16px;">The check is fully automatic: you enter the link to your job ad, we evaluate the role description, application process, employer benefits and reach, and show you the result in about 10 seconds, right on screen, with first concrete pointers. If you'd like to go deeper, we're happy to discuss the results in a free initial consultation.</p>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container">
+      <div class="section-head reveal" style="text-align:center;margin-left:auto;margin-right:auto;">
+        <span class="kicker">FAQ</span>
+        <h2>Frequently asked questions.</h2>
+      </div>
+      <div class="faq-list" style="margin:0 auto;">
+        <details class="faq-item"><summary>How long does the assessment take?</summary><p>About 10 seconds. The analysis runs fully automatically as soon as you enter the URL.</p></details>
+        <details class="faq-item"><summary>What's included in the result?</summary><p>An automatic assessment of your ad's role description, application process, employer benefits and reach, plus first concrete pointers.</p></details>
+        <details class="faq-item"><summary>Do I need to prepare anything?</summary><p>No. Just enter the link to your current job ad, the check handles the rest.</p></details>
+        <details class="faq-item"><summary>Is the check really free?</summary><p>Yes, completely free and with no obligation.</p></details>
+        <details class="faq-item"><summary>Which roles does the check work for?</summary><p>Any skilled-trade position. For other industries, just mention it in the initial consultation.</p></details>
+        <details class="faq-item"><summary>What happens to my data?</summary><p>We only load the page you provide, to evaluate it. No data is stored or shared. See our <a href="privacy-policy.html">privacy policy</a> for details.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <svg viewBox="0 0 754 616" style="height:34px;width:auto;" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0,616 L311,0 L376,129 L154,569 Q130,616 78,616 Z" fill="#FFFFFF"/>
+            <path d="M311,0 L400,0 Q443,0 465,44 L754,616 L674,616 Q622,616 598,569 Z" fill="#E8622C"/>
+            <circle cx="377" cy="419" r="64" fill="#FFFFFF"/>
+            <path d="M263,616 L263,585 A80,80 0 0 1 343,505 L411,505 A80,80 0 0 1 491,585 L491,616 Z" fill="#FFFFFF"/>
+          </svg>
+          <span class="brand-word"><span>A</span>&nbsp;Match</span>
+        </div>
+        <div class="footer-address">The match for the trades.</div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title mono">SERVICES</div>
+        <a href="index.html#services">Find skilled workers</a>
+        <a href="index.html#services">Employer branding</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title mono">COMPANY</div>
+        <a href="about.html">About</a>
+        <a href="references.html">References</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title mono">CONTACT</div>
+        <a href="mailto:contact@amatch.ch" class="icon-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>contact@amatch.ch</a>
+        <a href="tel:+41796402791" class="icon-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.5.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.2.2 2.4.57 3.5a1 1 0 0 1-.25 1z"/></svg>+41 79 640 27 91</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title mono">FOLLOW US</div>
+        <div class="footer-social"><a class="footer-social-icon" href="https://www.instagram.com/amatch.ch/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a><a class="footer-social-icon" href="https://www.facebook.com/profile.php?id=61593869547755&amp;locale=de_DE" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 3h-2a4 4 0 0 0-4 4v3H6v4h3v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a><a class="footer-social-icon" href="https://www.linkedin.com/company/amatchschweiz/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7M7 7v.01M12 17v-4.5a2.5 2.5 0 0 1 5 0V17M12 10v7"/></svg></a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 A Match</span>
+      <span><a href="legal-notice.html">Legal Notice</a> · <a href="privacy-policy.html">Privacy Policy</a> · <a href="terms.html">Terms</a></span>
+    </div>
+  </div>
+</footer>
+
+<a href="book-a-call.html" class="float-book" aria-label="Book a consultation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="visually-hidden">Book a consultation</span></a>
+
+<script src="../script.js" defer></script>
+</body>
+</html>

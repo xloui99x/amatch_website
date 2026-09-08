@@ -88,7 +88,9 @@
   var checkForm = document.querySelector('.js-website-check-form');
   if (checkForm) {
     var langPrefix = (document.documentElement.lang || 'de').slice(0, 2);
-    var CHECK_API = (window.AMATCH_CHECK_API || 'http://localhost:8913') + '/api/check';
+    var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        var DEFAULT_CHECK_API = isLocal ? 'http://localhost:8913' : 'https://amatch-checker.onrender.com';
+        var CHECK_API = (window.AMATCH_CHECK_API || DEFAULT_CHECK_API) + '/api/check';
     var T = {
       de: {
         analyzing: 'Analysiere …',

@@ -72,7 +72,7 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 800; letter-spacing: -0.02em; margin: 0; color: var(--navy); overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
+h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 800; letter-spacing: -0.02em; margin: 0; color: var(--navy); overflow-wrap: break-word; }
 p { margin: 0; overflow-wrap: break-word; }
 a { color: var(--orange-text); text-decoration: none; }
 img { display: block; max-width: 100%; }
@@ -438,7 +438,7 @@ footer { background: var(--navy); color: var(--on-navy-muted); padding: 64px 0 3
 }
 
 /* ── Contact page: info cards, CTA card, FAQ ────────────────────────── */
-.contact-hero { padding: 28px 0 8px; position: relative; }
+.contact-hero { padding-top: 28px; padding-bottom: 8px; position: relative; }
 .contact-hero > * { position: relative; z-index: 1; }
 .contact-hero p { font-size: 17px; line-height: 1.6; color: var(--text-muted); max-width: 34em; margin-top: 20px; }
 .contact-person { display: flex; align-items: center; gap: 14px; margin-top: 28px; }
@@ -657,7 +657,7 @@ footer { background: var(--navy); color: var(--on-navy-muted); padding: 64px 0 3
 .bci-4 { background: linear-gradient(135deg, #FBF3EC 0%, #E4D9C9 45%, #1B3557 100%); }
 .bci-5 { background: radial-gradient(circle at 65% 35%, #F3A876 0%, #E8622C 45%, #1B3557 100%); }
 .bci-6 { background: linear-gradient(145deg, #E4D9C9 0%, #E8622C 60%, #5C7A99 100%); }
-.article-hero { padding: 64px 0 8px; max-width: 760px; margin: 0 auto; }
+.article-hero { padding-top: 64px; padding-bottom: 8px; max-width: 760px; margin: 0 auto; }
 .article-meta { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); margin-top: 16px; }
 .article-cta { max-width: 760px; margin: 8px auto 64px; background: var(--navy); border-radius: var(--radius-lg); padding: 40px; color: #fff; text-align: center; }
 .article-cta h3 { font-size: 22px; color: #fff; }
@@ -729,9 +729,10 @@ footer { background: var(--navy); color: var(--on-navy-muted); padding: 64px 0 3
 /* ── Legal pages (Impressum / Datenschutz) ──────────────────────────── */
 .legal-hero { padding-top: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border); position: relative; }
 .legal-hero h1 { font-size: 40px; }
+@media (max-width: 480px) { .legal-hero h1 { font-size: 32px; } }
 .booking-top { position: relative; }
 .legal-updated { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 12px; }
-.prose { max-width: 760px; padding: 56px 0 96px; }
+.prose { max-width: 760px; padding-top: 56px; padding-bottom: 96px; }
 .prose h2 { font-size: 22px; margin-top: 44px; margin-bottom: 14px; }
 .prose h2:first-child { margin-top: 0; }
 .prose p, .prose li { font-size: 16px; line-height: 1.65; color: var(--text-muted); }

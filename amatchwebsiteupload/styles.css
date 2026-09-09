@@ -423,7 +423,21 @@ footer { background: var(--navy); color: var(--on-navy-muted); padding: 64px 0 3
 }
 
 @media (max-width: 640px) {
-  .hero-ctas { flex-direction: column; align-items: stretch; }
+  .hero-ctas { flex-direction: column; align-items: stretch; gap: 10px; }
+  .hero { padding-top: 0; }
+  .hero-grid { position: static; padding-top: 28px; padding-bottom: 28px; }
+  .hero-grid > div:first-child { position: relative; z-index: 1; }
+  .hero-media {
+    position: absolute; inset: 0; z-index: 0; margin: 0;
+    border-radius: 0; border: none; box-shadow: none; aspect-ratio: auto;
+  }
+  .hero-media::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(185deg, rgba(23, 30, 41, .3) 0%, rgba(23, 30, 41, .82) 100%);
+  }
+  .hero .kicker { color: rgba(255, 255, 255, .8); }
+  .hero h1 { color: #fff; font-size: 30px; line-height: 1.15; margin-bottom: 12px; }
+  .hero-sub { color: rgba(255, 255, 255, .9); font-size: 15px; line-height: 1.5; margin-bottom: 20px; }
   .process-grid, .jobs-grid, .footer-grid { grid-template-columns: 1fr; }
   .process-card:not(:last-child)::after {
     content: ''; position: absolute; left: 32px; bottom: -25px; width: 1px; height: 24px; background: var(--border);

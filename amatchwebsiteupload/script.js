@@ -102,12 +102,6 @@
         ctaTitle: 'Kostenloses Erstgespräch',
         ctaText: 'Besprechen Sie die Ergebnisse direkt mit mir – 20 Minuten, unverbindlich.',
         ctaBtn: 'Termin buchen',
-        emailTitle: 'Ergebnis per E-Mail sichern',
-        emailText: 'Tragen Sie Ihre E-Mail ein und erhalten Sie eine Kopie dieses Berichts, direkt zum Nachlesen.',
-        emailPh: 'ihre@email.ch', emailBtn: 'Bericht per E-Mail senden',
-        mailSubject: 'Ihr Stellenanzeigen-Check-Ergebnis · A Match',
-        mailIntro: 'Hier Ihr Stellenanzeigen-Check-Ergebnis von A Match:',
-        mailScore: 'Gesamtscore', mailFindings: 'Erste Ansatzpunkte:', mailCtaLabel: 'Ergebnis besprechen? Kostenloses Erstgespräch buchen:',
       },
       fr: {
         analyzing: 'Analyse en cours …',
@@ -119,12 +113,6 @@
         ctaTitle: 'Entretien initial gratuit',
         ctaText: 'Discutons des résultats ensemble – 20 minutes, sans engagement.',
         ctaBtn: 'Prendre rendez-vous',
-        emailTitle: 'Recevoir le résultat par e-mail',
-        emailText: 'Indiquez votre e-mail et recevez une copie de ce rapport, prête à relire.',
-        emailPh: 'votre@email.ch', emailBtn: 'Envoyer le rapport par e-mail',
-        mailSubject: 'Votre résultat de vérification d\'annonce · A Match',
-        mailIntro: 'Voici votre résultat de vérification d\'annonce A Match :',
-        mailScore: 'Score global', mailFindings: 'Premières pistes :', mailCtaLabel: 'Envie d\'en discuter ? Réservez un entretien initial gratuit :',
       },
       en: {
         analyzing: 'Analyzing …',
@@ -136,12 +124,6 @@
         ctaTitle: 'Free initial consultation',
         ctaText: "Let's talk through the results together – 20 minutes, no obligation.",
         ctaBtn: 'Book a call',
-        emailTitle: 'Save the result by email',
-        emailText: 'Enter your email and get a copy of this report to read later.',
-        emailPh: 'you@email.ch', emailBtn: 'Send report by email',
-        mailSubject: 'Your Job Ad Check Result · A Match',
-        mailIntro: 'Here is your A Match job ad check result:',
-        mailScore: 'Overall score', mailFindings: 'First pointers:', mailCtaLabel: 'Want to talk it through? Book a free initial consultation:',
       },
     };
     var strings = T[langPrefix] || T.de;
@@ -192,16 +174,6 @@
         '<p>' + esc(strings.ctaText) + '</p>' +
         '<a href="' + esc(bookingUrl) + '" class="btn btn-primary">' + esc(strings.ctaBtn) + '<span class="btn-arrow">&nbsp;→</span></a>' +
         '</div>';
-
-      var emailBoxHtml =
-        '<div class="report-email-box">' +
-        '<h3>' + esc(strings.emailTitle) + '</h3>' +
-        '<p>' + esc(strings.emailText) + '</p>' +
-        '<form class="report-email-form">' +
-        '<input type="email" name="reportEmail" placeholder="' + esc(strings.emailPh) + '" required>' +
-        '<button type="submit" class="btn btn-secondary">' + esc(strings.emailBtn) + '</button>' +
-        '</form></div>';
-
       resultsEl.innerHTML =
         '<div class="container" style="padding:40px 0 0;">' +
         '<div class="section-head reveal is-visible" style="text-align:center;margin-left:auto;margin-right:auto;"><span class="kicker">' + esc(strings.resultKicker) + '</span><h2>' + esc(data.url) + '</h2></div>' +
@@ -215,37 +187,9 @@
         '<h3 style="text-align:center;margin-top:32px;font-size:18px;">' + esc(strings.findingsTitle) + '</h3>' +
         findingsHtml +
         ctaBoxHtml +
-        emailBoxHtml +
-        '</div>';
+                '</div>';
       resultsEl.hidden = false;
       resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-      var emailForm = resultsEl.querySelector('.report-email-form');
-      if (emailForm) {
-        emailForm.addEventListener('submit', function (e) {
-          e.preventDefault();
-          var toEmail = (emailForm.querySelector('input[type="email"]').value || '').trim();
-          if (!toEmail) return;
-          var lines = [
-            strings.mailIntro, '',
-            data.url, '',
-            strings.mailScore + ': ' + data.overall + '/100', '',
-          ];
-          Object.keys(cats).forEach(function (k) {
-            lines.push(k + ': ' + cats[k].score + '/100');
-          });
-          lines.push('');
-          lines.push(strings.mailFindings);
-          weak.forEach(function (c) {
-            lines.push('- ' + c.name + ': ' + c.finding);
-          });
-          lines.push('');
-          lines.push(strings.mailCtaLabel);
-          lines.push(bookingUrl);
-          var body = lines.join('\n');
-          window.location.href = 'mailto:' + encodeURIComponent(toEmail) + '?subject=' + encodeURIComponent(strings.mailSubject) + '&body=' + encodeURIComponent(body);
-        });
-      }
     };
 
     checkForm.addEventListener('submit', function (e) {

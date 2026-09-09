@@ -19,15 +19,23 @@ Pass ?lang=de|fr|en to localize check names/findings (default: de).
 Run: python3 checker_server.py   (listens on :8913)
 Requires: flask, requests, beautifulsoup4 (pip install flask requests beautifulsoup4)
 """
+import base64
+import io
+import os
 import re
 import time
+from html import escape
 from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, jsonify, request
+from PIL import Image, ImageDraw, ImageFont
 
 app = Flask(__name__)
+
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+RESEND_FROM = os.environ.get("RESEND_FROM", "A Match <onboarding@resend.dev>")
 UA = "Mozilla/5.0 (compatible; AMatchStellenanzeigenCheck/1.0; +https://amatch.ch)"
 
 BENEFIT_WORDS = {
@@ -89,6 +97,52 @@ CATS = {
     "fr": {"task": "Description du poste", "process": "Processus de candidature", "benefits": "Avantages employeur", "reach": "Portée"},
     "en": {"task": "Role description", "process": "Application process", "benefits": "Employer benefits", "reach": "Reach"},
 }
+
+BOOKING_URLS = {
+    "de": "https://amatch.ch/termin.html",
+    "fr": "https://amatch.ch/fr/rendez-vous.html",
+    "en": "https://amatch.ch/en/book-a-call.html",
+}
+
+EMAIL_LABELS = {
+    "de": {
+        "overall": "Gesamtscore",
+        "subject": "Ihr Stellenanzeigen-Check-Ergebnis · A Match",
+        "intro": "Hier Ihr Stellenanzeigen-Check-Ergebnis von A Match:",
+        "findings_title": "Erste Ansatzpunkte",
+        "all_good": "Starke Anzeige, alle Punkte erfüllt!",
+        "cta_btn": "Kostenloses Erstgespräch buchen",
+        "invalid_email": "Ungültige E-Mail-Adresse",
+        "missing_url": "Keine URL angegeben",
+        "not_configured": "Der E-Mail-Versand ist gerade nicht verfügbar. Bitte später erneut versuchen.",
+        "send_failed": "Der Versand hat leider nicht geklappt. Bitte später erneut versuchen.",
+    },
+    "fr": {
+        "overall": "Score global",
+        "subject": "Votre résultat de vérification d'annonce · A Match",
+        "intro": "Voici votre résultat de vérification d'annonce A Match :",
+        "findings_title": "Premières pistes",
+        "all_good": "Annonce solide, tous les points sont remplis !",
+        "cta_btn": "Réserver un entretien initial gratuit",
+        "invalid_email": "Adresse e-mail invalide",
+        "missing_url": "Aucune URL indiquée",
+        "not_configured": "L'envoi par e-mail n'est pas disponible pour le moment. Merci de réessayer plus tard.",
+        "send_failed": "L'envoi a malheureusement échoué. Merci de réessayer plus tard.",
+    },
+    "en": {
+        "overall": "Overall score",
+        "subject": "Your Job Ad Check Result · A Match",
+        "intro": "Here is your A Match job ad check result:",
+        "findings_title": "First pointers",
+        "all_good": "Strong job ad, every point is covered!",
+        "cta_btn": "Book a free initial consultation",
+        "invalid_email": "Invalid email address",
+        "missing_url": "No URL provided",
+        "not_configured": "Email sending is currently unavailable. Please try again later.",
+        "send_failed": "Sending failed. Please try again later.",
+    },
+}
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 FINDINGS = {
     "de": {
         "text_length_pass": lambda n: f"{n} Wörter, guter Umfang für echte Details",
@@ -210,9 +264,103 @@ FINDINGS = {
 @app.after_request
 def add_cors(resp):
     resp.headers["Access-Control-Allow-Origin"] = "*"
-    resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return resp
+
+
+def make_chart(result, lang):
+    """Renders a small branded PNG bar chart (overall + 4 category scores)."""
+    cat_map = CATS.get(lang, CATS["de"])
+    items = [(EMAIL_LABELS.get(lang, EMAIL_LABELS["de"])["overall"], result["overall"])]
+    for label in cat_map.values():
+        items.append((label, result["categories"][label]["score"]))
+
+    navy = (27, 53, 87)
+    orange = (232, 98, 44)
+    track = (236, 225, 211)
+    muted = (75, 85, 99)
+
+    try:
+        font_label = ImageFont.load_default(size=22)
+        font_score = ImageFont.load_default(size=22)
+    except TypeError:
+        font_label = ImageFont.load_default()
+        font_score = font_label
+
+    row_h = 68
+    W, H = 720, 40 + len(items) * row_h
+    img = Image.new("RGB", (W, H), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    bar_x0, bar_w, bar_h = 250, 360, 26
+    y = 24
+    for label, score in items:
+        draw.text((0, y + 3), label, fill=navy, font=font_label)
+        score = max(0, min(100, score))
+        fill_w = round(bar_w * score / 100)
+        if fill_w >= bar_h:
+            draw.rounded_rectangle([bar_x0, y, bar_x0 + bar_w, y + bar_h], radius=13, fill=track)
+            draw.rounded_rectangle([bar_x0, y, bar_x0 + fill_w, y + bar_h], radius=13, fill=orange)
+        else:
+            draw.rounded_rectangle([bar_x0, y, bar_x0 + bar_w, y + bar_h], radius=13, fill=track)
+            if fill_w > 0:
+                draw.ellipse([bar_x0, y, bar_x0 + bar_h, y + bar_h], fill=orange)
+        draw.text((bar_x0 + bar_w + 18, y + 3), f"{score}/100", fill=muted, font=font_score)
+        y += row_h
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+
+def send_report_email(to_email, result, lang):
+    labels = EMAIL_LABELS.get(lang, EMAIL_LABELS["de"])
+    chart_b64 = base64.b64encode(make_chart(result, lang)).decode("ascii")
+
+    weak = [c for c in result["checks"] if c["status"] != "pass"]
+    weak.sort(key=lambda c: 0 if c["status"] == "fail" else 1)
+    weak = weak[:4]
+    if weak:
+        findings_html = "".join(
+            f'<li style="margin-bottom:8px;"><strong>{escape(c["name"])}:</strong> {escape(c["finding"])}</li>'
+            for c in weak
+        )
+    else:
+        findings_html = f"<li>{escape(labels['all_good'])}</li>"
+
+    booking_url = BOOKING_URLS.get(lang, BOOKING_URLS["de"])
+    html = f"""
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;padding:8px;">
+      <h2 style="color:#1B3557;font-size:19px;margin:0 0 8px;">{escape(labels['intro'])}</h2>
+      <p style="color:#4B5563;font-size:14px;word-break:break-all;margin:0 0 20px;">{escape(result['url'])}</p>
+      <img src="cid:scorechart" alt="{escape(labels['overall'])}: {result['overall']}/100" width="600" style="width:100%;max-width:600px;height:auto;display:block;border:1px solid #ECE1D3;border-radius:12px;" />
+      <h3 style="color:#1B3557;font-size:16px;margin:28px 0 10px;">{escape(labels['findings_title'])}</h3>
+      <ul style="color:#4B5563;font-size:14px;line-height:1.6;padding-left:20px;margin:0;">{findings_html}</ul>
+      <p style="margin:28px 0 0;">
+        <a href="{escape(booking_url)}" style="background:#E8622C;color:#171E29;padding:13px 26px;border-radius:999px;text-decoration:none;font-weight:bold;font-size:15px;display:inline-block;">{escape(labels['cta_btn'])}</a>
+      </p>
+    </div>
+    """
+
+    payload = {
+        "from": RESEND_FROM,
+        "to": [to_email],
+        "subject": labels["subject"],
+        "html": html,
+        "attachments": [{
+            "filename": "score.png",
+            "content": chart_b64,
+            "content_id": "scorechart",
+        }],
+    }
+    resp = requests.post(
+        "https://api.resend.com/emails",
+        json=payload,
+        headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+        timeout=15,
+    )
+    return resp.ok
 
 
 def normalize_url(u):
@@ -378,6 +526,40 @@ def api_check():
     if "error" in result:
         return jsonify(result), 502
     return jsonify(result)
+
+
+@app.route("/api/send-report", methods=["POST", "OPTIONS"])
+def api_send_report():
+    if request.method == "OPTIONS":
+        return ("", 204)
+    data = request.get_json(silent=True) or {}
+    lang = data.get("lang", "de")
+    if lang not in ("de", "fr", "en"):
+        lang = "de"
+    labels = EMAIL_LABELS[lang]
+
+    if not RESEND_API_KEY:
+        return jsonify({"error": labels["not_configured"]}), 503
+
+    to_email = (data.get("email") or "").strip()
+    if not to_email or not EMAIL_RE.match(to_email):
+        return jsonify({"error": labels["invalid_email"]}), 400
+
+    raw_url = data.get("url", "")
+    if not raw_url:
+        return jsonify({"error": labels["missing_url"]}), 400
+
+    result = check_job_ad(raw_url, lang)
+    if "error" in result:
+        return jsonify(result), 502
+
+    try:
+        ok = send_report_email(to_email, result, lang)
+    except Exception:
+        ok = False
+    if not ok:
+        return jsonify({"error": labels["send_failed"]}), 502
+    return jsonify({"status": "sent"})
 
 
 @app.route("/api/health")

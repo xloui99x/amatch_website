@@ -59,7 +59,7 @@ html { scroll-behavior: smooth; }
 }
 
 html {
-     overflow-x: hidden;
+  overflow-x: hidden;
 }
 
 body {
@@ -627,6 +627,24 @@ footer { background: var(--navy); color: var(--on-navy-muted); padding: 64px 0 3
 .report-cta-box h3 { color: #fff; font-size: 19px; }
 .report-cta-box p { color: var(--on-navy-muted); font-size: 14px; line-height: 1.6; margin-top: 8px; }
 .report-cta-box .btn { margin-top: 20px; }
+.report-email-box {
+  max-width: 560px; margin: 20px auto 0; background: var(--beige-surface);
+  border: 1px solid var(--beige-border); border-radius: var(--radius-lg); padding: 32px; text-align: center;
+}
+.report-email-box h3 { color: var(--navy); font-size: 17px; }
+.report-email-box p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-top: 8px; }
+.report-email-form { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.report-email-form input {
+  flex: 1; min-width: 200px; padding: 13px 16px; border: 1px solid var(--border); border-radius: var(--radius-pill);
+  font-size: 15px; font-family: inherit; color: var(--text); background: #fff;
+}
+.report-email-form input:focus { outline: 2px solid var(--orange); outline-offset: 1px; }
+.report-email-form input:disabled { opacity: .6; }
+.report-email-form .btn { flex: none; }
+.report-email-note { width: 100%; font-size: 13px; margin-top: 4px; }
+.report-email-note.is-success { color: var(--success); font-weight: 600; }
+.report-email-note.is-error { color: var(--error); }
+@media (max-width: 560px) { .report-email-form { flex-direction: column; } }
 @media (max-width: 860px) { .report-grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* ── Blog ─────────────────────────────────────────────────────────────── */

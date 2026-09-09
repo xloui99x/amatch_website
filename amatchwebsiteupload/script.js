@@ -89,8 +89,9 @@
   if (checkForm) {
     var langPrefix = (document.documentElement.lang || 'de').slice(0, 2);
     var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-        var DEFAULT_CHECK_API = isLocal ? 'http://localhost:8913' : 'https://amatch-checker.onrender.com';
-        var CHECK_API = (window.AMATCH_CHECK_API || DEFAULT_CHECK_API) + '/api/check';
+    var DEFAULT_CHECK_API = isLocal ? 'http://localhost:8913' : 'https://amatch-checker.onrender.com';
+    var CHECK_API = (window.AMATCH_CHECK_API || DEFAULT_CHECK_API) + '/api/check';
+    var SEND_REPORT_API = (window.AMATCH_CHECK_API || DEFAULT_CHECK_API) + '/api/send-report';
     var T = {
       de: {
         analyzing: 'Analysiere …',
@@ -102,6 +103,10 @@
         ctaTitle: 'Kostenloses Erstgespräch',
         ctaText: 'Besprechen Sie die Ergebnisse direkt mit mir – 20 Minuten, unverbindlich.',
         ctaBtn: 'Termin buchen',
+        emailTitle: 'Ergebnis per E-Mail erhalten',
+        emailText: 'Tragen Sie Ihre E-Mail ein und wir schicken Ihnen eine Kopie des Ergebnisses inklusive Grafik.',
+        emailPh: 'ihre@email.ch', emailBtn: 'Ergebnis per E-Mail senden', emailSending: 'Wird gesendet …',
+        emailSuccess: 'Gesendet! Bitte prüfen Sie Ihr Postfach.',
       },
       fr: {
         analyzing: 'Analyse en cours …',
@@ -113,6 +118,10 @@
         ctaTitle: 'Entretien initial gratuit',
         ctaText: 'Discutons des résultats ensemble – 20 minutes, sans engagement.',
         ctaBtn: 'Prendre rendez-vous',
+        emailTitle: 'Recevoir le résultat par e-mail',
+        emailText: 'Indiquez votre e-mail et nous vous envoyons une copie du résultat, graphique incluse.',
+        emailPh: 'votre@email.ch', emailBtn: 'Envoyer le résultat par e-mail', emailSending: 'Envoi en cours …',
+        emailSuccess: 'Envoyé ! Merci de vérifier votre boîte de réception.',
       },
       en: {
         analyzing: 'Analyzing …',
@@ -124,6 +133,10 @@
         ctaTitle: 'Free initial consultation',
         ctaText: "Let's talk through the results together – 20 minutes, no obligation.",
         ctaBtn: 'Book a call',
+        emailTitle: 'Get the result by email',
+        emailText: "Enter your email and we'll send you a copy of the result, chart included.",
+        emailPh: 'you@email.ch', emailBtn: 'Send result by email', emailSending: 'Sending …',
+        emailSuccess: 'Sent! Please check your inbox.',
       },
     };
     var strings = T[langPrefix] || T.de;
@@ -174,6 +187,16 @@
         '<p>' + esc(strings.ctaText) + '</p>' +
         '<a href="' + esc(bookingUrl) + '" class="btn btn-primary">' + esc(strings.ctaBtn) + '<span class="btn-arrow">&nbsp;→</span></a>' +
         '</div>';
+
+      var emailBoxHtml =
+        '<div class="report-email-box">' +
+        '<h3>' + esc(strings.emailTitle) + '</h3>' +
+        '<p>' + esc(strings.emailText) + '</p>' +
+        '<form class="report-email-form">' +
+        '<input type="email" name="reportEmail" placeholder="' + esc(strings.emailPh) + '" required>' +
+        '<button type="submit" class="btn btn-secondary">' + esc(strings.emailBtn) + '</button>' +
+        '</form></div>';
+
       resultsEl.innerHTML =
         '<div class="container" style="padding:40px 0 0;">' +
         '<div class="section-head reveal is-visible" style="text-align:center;margin-left:auto;margin-right:auto;"><span class="kicker">' + esc(strings.resultKicker) + '</span><h2>' + esc(data.url) + '</h2></div>' +
@@ -187,9 +210,47 @@
         '<h3 style="text-align:center;margin-top:32px;font-size:18px;">' + esc(strings.findingsTitle) + '</h3>' +
         findingsHtml +
         ctaBoxHtml +
-                '</div>';
+        emailBoxHtml +
+        '</div>';
       resultsEl.hidden = false;
       resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      var emailForm = resultsEl.querySelector('.report-email-form');
+      if (emailForm) {
+        emailForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var emailInput = emailForm.querySelector('input[type="email"]');
+          var toEmail = (emailInput.value || '').trim();
+          if (!toEmail) return;
+          var sendBtn = emailForm.querySelector('button[type="submit"]');
+          var originalBtnText = sendBtn.textContent;
+          sendBtn.disabled = true;
+          emailInput.disabled = true;
+          sendBtn.textContent = strings.emailSending;
+          fetch(SEND_REPORT_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: toEmail, url: data.url, lang: langPrefix }),
+          })
+            .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
+            .then(function (res) {
+              if (!res.ok || res.body.error) {
+                sendBtn.disabled = false; emailInput.disabled = false;
+                sendBtn.textContent = originalBtnText;
+                emailForm.insertAdjacentHTML('beforeend',
+                  '<p class="report-email-note is-error">' + esc(res.body.error || strings.errorGeneric) + '</p>');
+                return;
+              }
+              emailForm.innerHTML = '<p class="report-email-note is-success">' + esc(strings.emailSuccess) + '</p>';
+            })
+            .catch(function () {
+              sendBtn.disabled = false; emailInput.disabled = false;
+              sendBtn.textContent = originalBtnText;
+              emailForm.insertAdjacentHTML('beforeend',
+                '<p class="report-email-note is-error">' + esc(strings.errorGeneric) + '</p>');
+            });
+        });
+      }
     };
 
     checkForm.addEventListener('submit', function (e) {

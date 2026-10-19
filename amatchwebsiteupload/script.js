@@ -148,6 +148,16 @@
       return d.innerHTML;
     };
 
+    // Scores come from the server; force them into 0–100 before they reach innerHTML or CSS.
+    var pct = function (v) {
+      var n = Math.round(Number(v));
+      return isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+    };
+    var int = function (v) {
+      var n = parseInt(v, 10);
+      return isFinite(n) ? n : 0;
+    };
+
     var renderError = function (msg) {
       if (!resultsEl) return;
       resultsEl.hidden = false;
@@ -161,9 +171,9 @@
       var catCards = Object.keys(cats).map(function (k) {
         var c = cats[k];
         return '<div class="report-cat-card"><div class="report-card-label">' + esc(k) + '</div>' +
-          '<span class="num">' + c.score + '<span>/100</span></span>' +
-          '<div class="report-bar"><div class="report-bar-fill" style="width:' + c.score + '%"></div></div>' +
-          '<div class="report-card-sub">' + esc(strings.passedOf(c.passed, c.total)) + '</div></div>';
+          '<span class="num">' + pct(c.score) + '<span>/100</span></span>' +
+          '<div class="report-bar"><div class="report-bar-fill" style="width:' + pct(c.score) + '%"></div></div>' +
+          '<div class="report-card-sub">' + esc(strings.passedOf(int(c.passed), int(c.total))) + '</div></div>';
       }).join('');
 
       var weak = (data.checks || []).filter(function (c) { return c.status !== 'pass'; })
@@ -202,9 +212,9 @@
         '<div class="section-head reveal is-visible" style="text-align:center;margin-left:auto;margin-right:auto;"><span class="kicker">' + esc(strings.resultKicker) + '</span><h2>' + esc(data.url) + '</h2></div>' +
         '<div class="report-grid">' +
         '<div class="report-score-card"><div class="report-card-label">' + esc(strings.overall) + '</div>' +
-        '<span class="num">' + data.overall + '<span>/100</span></span>' +
-        '<div class="report-bar"><div class="report-bar-fill" style="width:' + data.overall + '%"></div></div>' +
-        '<div class="report-card-sub">' + esc(strings.passedOf(data.total_passed, data.total_checks)) + '</div></div>' +
+        '<span class="num">' + pct(data.overall) + '<span>/100</span></span>' +
+        '<div class="report-bar"><div class="report-bar-fill" style="width:' + pct(data.overall) + '%"></div></div>' +
+        '<div class="report-card-sub">' + esc(strings.passedOf(int(data.total_passed), int(data.total_checks))) + '</div></div>' +
         catCards +
         '</div>' +
         '<h3 style="text-align:center;margin-top:32px;font-size:18px;">' + esc(strings.findingsTitle) + '</h3>' +

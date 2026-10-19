@@ -1,57 +1,96 @@
-# A Match — Stellenanzeigen-Check Backend
+# Job-ad check backend
 
-Macht den "Stellenanzeige analysieren"-Button auf `stellencheck.html` /
-`fr/verification-annonce.html` / `en/job-ad-check.html` echt: er ruft die
-eingegebene URL serverseitig auf (kein CORS-Problem, da Server-zu-Server)
-und bewertet **Inhalt**, nicht Technik — bewusst **keine SEO-/Performance-
-Metriken**. Geprüft wird, ob die Stellenanzeige als Text wirklich gut ist
-und die richtige Zielgruppe anspricht, in denselben vier Kategorien wie im
-"Was wir prüfen"-Abschnitt: Aufgabenbeschreibung, Bewerbungsprozess,
-Arbeitgebervorteile, Reichweite (z. B. Textlänge und Konkretheit der
-Aufgabenbeschreibung, sichtbarer Kontaktweg, erwähnter Lohn/Weiterbildung/
-Team, mobile Optimierung, persönliche Ansprache, Bildmaterial).
+The service behind the **Stellenanzeigen-Check** on
+[amatch.ch](https://amatch.ch/stellencheck.html). A business owner pastes the
+link to a job ad; the server downloads the page, scores its *content* (not
+SEO) in four categories and can e-mail the result with a chart.
 
-Das ist eine **regelbasierte** Auswertung (Stichwort-/Struktur-Erkennung),
-keine KI-Bewertung der Textqualität selbst — ehrlich als "erste
-Ansatzpunkte" kommuniziert, nicht als abschliessendes Urteil.
+## How it works
 
-## Lokal testen
+```
+browser ──GET /api/check?url=…──▶ app.py ──▶ safe_fetch.py ──▶ job ad (public web)
+                                     │
+                                     └──▶ analysis.py ──▶ JSON report ──▶ script.js renders it
+browser ──POST /api/send-report──▶ app.py ──▶ report_email.py ──▶ Resend API ──▶ inbox
+```
+
+| Module | Responsibility |
+|---|---|
+| `amatch_checker/analysis.py` | 16 rule-based checks in 4 categories, scoring. Pure function of the HTML. |
+| `amatch_checker/safe_fetch.py` | Downloads user-supplied URLs without SSRF (see below). |
+| `amatch_checker/report_email.py` | PNG score chart (Pillow) and the HTML e-mail. |
+| `amatch_checker/app.py` | Flask routes, validation, CORS, rate limits. |
+| `amatch_checker/i18n.py` | All texts in German, French and English. |
+| `checker_server.py` | Entry point (`gunicorn checker_server:app`). |
+
+### What is checked
+
+| Category | Checks |
+|---|---|
+| Role description | text length (150–700 words), concrete details (workload, EFZ…), list structure, meaningful title |
+| Application process | visible e-mail/phone (links *and* plain text, Swiss number formats), WhatsApp, form length, call to action |
+| Employer benefits | salary, training, team/culture, extras |
+| Reach | mobile viewport, direct address of the reader, images, social preview (Open Graph) |
+
+A category score is the share of passed checks. The checks are keyword and
+structure detection, so the page presents them honestly as *first pointers*.
+
+## Security
+
+The endpoint fetches arbitrary URLs typed in by visitors, which makes it a
+classic target for **server-side request forgery**. `safe_fetch.py`:
+
+- allows only `http`/`https` on ports 80/443 and rejects credentials in URLs
+- resolves the host and rejects it if *any* address is private, loopback,
+  link-local (e.g. the `169.254.169.254` cloud metadata service) or reserved
+- follows redirects manually and validates **every hop**, so a public page
+  cannot bounce the server to an internal address
+- caps the response at 3 MB and times out after 8 s
+
+On top of that, `app.py` rate-limits checks (20/min) and e-mails (5/h) per
+client and only sends CORS headers to configured origins. All values that end
+up in the e-mail are HTML-escaped.
+
+## Run locally
 
 ```bash
-pip install flask requests beautifulsoup4
-python3 checker_server.py
+cd amatchwebsiteupload/backend
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+python3 checker_server.py            # http://localhost:8913
 ```
 
-Läuft dann auf `http://localhost:8913`. Die Seiten rufen standardmässig
-`http://localhost:8913/api/check?url=...` auf (siehe `AMATCH_CHECK_API` in
-`script.js`, im Abschnitt "Stellenanzeigen-Check").
+Serve the website from `amatchwebsiteupload/` (for example
+`python3 -m http.server 8000`) and open
+`http://localhost:8000/stellencheck.html`; on localhost `script.js` calls the
+local backend automatically.
 
-## Wichtig: das braucht echtes Hosting
+## Quality checks
 
-Der Rest der Website ist statisches HTML/CSS/JS — läuft auf praktisch
-jedem Webhosting. Dieser Ordner ist anders: ein **echter Python-Server**,
-der eine laufende Umgebung braucht (nicht nur Dateien hochladen). Sobald
-amatch.ch ein festes Hosting hat:
-
-- **Kleiner Cloud-Server** (Render, Railway, Fly.io, PythonAnywhere): am
-  einfachsten, da der Server hier schon fertig ist — `backend/` dorthin
-  deployen.
-- **Serverless-Funktion** (Vercel, Cloudflare Workers, Netlify Functions):
-  braucht etwas Anpassung der Check-Logik an das Funktionsformat, aber gut
-  machbar mit derselben Logik aus `checker_server.py`.
-
-Danach in `script.js` die Zeile
-
-```js
-var CHECK_API = (window.AMATCH_CHECK_API || 'http://localhost:8913') + '/api/check';
+```bash
+pytest          # 94 tests: every check, scoring, SSRF cases, HTTP API, e-mail
+ruff check .    # lint
+mypy amatch_checker checker_server.py   # strict type checking
 ```
 
-auf die echte Backend-URL zeigen lassen — entweder den Fallback-Wert
-anpassen, oder vor dem Laden von `script.js` in jeder HTML-Seite setzen:
+They also run on every push via GitHub Actions.
 
-```html
-<script>window.AMATCH_CHECK_API = 'https://check-api.amatch.ch';</script>
-<script src="script.js" defer></script>
-```
+## Configuration
 
-Bis dahin funktioniert der Check nur lokal während der Weiterentwicklung.
+| Variable | Default | Purpose |
+|---|---|---|
+| `RESEND_API_KEY` | – | Enables `/api/send-report`. Without it the endpoint answers 503. |
+| `RESEND_FROM` | `A Match <onboarding@resend.dev>` | Sender address. |
+| `AMATCH_ALLOWED_ORIGINS` | `https://amatch.ch,https://www.amatch.ch,http://localhost:8000,http://127.0.0.1:8000` | Comma-separated origins allowed to call the API from a browser. `*` allows all. |
+| `PORT` | `8913` | Port for `python3 checker_server.py`. |
+
+## Deployment (Render)
+
+- Root directory: `amatchwebsiteupload/backend`
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn checker_server:app`
+- Set `RESEND_API_KEY` and, if the site is served from a domain other than
+  amatch.ch, `AMATCH_ALLOWED_ORIGINS`.
+
+The frontend points at the deployed URL in `script.js` (`DEFAULT_CHECK_API`),
+or per page via `window.AMATCH_CHECK_API`.

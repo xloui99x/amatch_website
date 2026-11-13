@@ -11,7 +11,7 @@ trade businesses (Handwerksbetriebe), plus the backend for its free
 ## What's in here
 
 **A trilingual static website** (German, French, English): service pages,
-references, six blog articles per language, booking and legal pages.
+six blog articles per language, booking and legal pages.
 Plain HTML, CSS and JavaScript with no framework and no build step, so it
 loads fast on a phone at a construction site and can be hosted anywhere.
 
